@@ -1,5 +1,5 @@
 
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
@@ -21,10 +21,11 @@ const updateLeadSchema = z.object({
 })
 
 export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  request: Request,
+  context: { params: { id: string } }
 ) {
   try {
+    const { params } = context
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -51,10 +52,10 @@ export async function PUT(
 
     const updatedData = { ...existingLead, ...validatedData }
     const score = calculateLeadScore({
-      company: updatedData.company,
-      title: updatedData.title,
-      industry: updatedData.industry,
-      companySize: updatedData.companySize
+      title: updatedData.title ?? undefined,
+      industry: updatedData.industry ?? undefined,
+      companySize: updatedData.companySize ?? undefined,
+      source: updatedData.source ?? undefined
     })
 
     const lead = await prisma.lead.update({
@@ -76,10 +77,11 @@ export async function PUT(
 }
 
 export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  request: Request,
+  context: { params: { id: string } }
 ) {
   try {
+    const { params } = context
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

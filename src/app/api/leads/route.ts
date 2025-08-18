@@ -42,14 +42,16 @@ export async function GET(request: NextRequest) {
       where: {
         userId: user.id,
         ...(status && { status }),
-        ...(search && {
-          OR: [
-            { firstName: { contains: search, mode: 'insensitive' } },
-            { lastName: { contains: search, mode: 'insensitive' } },
-            { email: { contains: search, mode: 'insensitive' } },
-            { company: { contains: search, mode: 'insensitive' } }
-          ]
-        })
+        ...(search
+          ? {
+              OR: [
+                { firstName: { contains: search as string } },
+                { lastName: { contains: search as string } },
+                { email: { contains: search as string } },
+                { company: { contains: search as string } }
+              ]
+            }
+          : {})
       },
       orderBy: [
         { score: 'desc' },
@@ -83,7 +85,6 @@ export async function POST(request: NextRequest) {
     const validatedData = createLeadSchema.parse(body)
 
     const score = calculateLeadScore({
-      company: validatedData.company,
       title: validatedData.title,
       industry: validatedData.industry,
       companySize: validatedData.companySize
