@@ -7,7 +7,13 @@ import { prisma } from '@/lib/prisma'
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user?.id) {
+    const email = session?.user?.email
+    if (!email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const user = await prisma.user.findUnique({ where: { email } })
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -17,16 +23,18 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search')
 
     const where = {
-      userId: session.user.id,
+      userId: user.id,
       ...(status && { status }),
-      ...(search && {
-        OR: [
-          { firstName: { contains: search, mode: 'insensitive' as const } },
-          { lastName: { contains: search, mode: 'insensitive' as const } },
-          { email: { contains: search, mode: 'insensitive' as const } },
-          { company: { contains: search, mode: 'insensitive' as const } },
-        ],
-      }),
+      ...(search
+        ? {
+            OR: [
+              { firstName: { contains: search } },
+              { lastName: { contains: search } },
+              { email: { contains: search } },
+              { company: { contains: search } },
+            ],
+          }
+        : {}),
     }
 
     const leads = await prisma.lead.findMany({

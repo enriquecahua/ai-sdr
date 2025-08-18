@@ -8,7 +8,13 @@ import { sendEmail } from '@/lib/email'
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user?.id) {
+    const email = session?.user?.email
+    if (!email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const user = await prisma.user.findUnique({ where: { email } })
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -23,7 +29,7 @@ export async function POST(request: NextRequest) {
         body,
         status: 'sent',
         sentAt: new Date(),
-        userId: session.user.id
+        userId: user.id
       }
     })
 
@@ -80,7 +86,13 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user?.id) {
+    const email = session?.user?.email
+    if (!email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const user = await prisma.user.findUnique({ where: { email } })
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -88,7 +100,7 @@ export async function GET(request: NextRequest) {
     const leadId = searchParams.get('leadId')
 
     const where = {
-      userId: session.user.id,
+      userId: user.id,
       ...(leadId && { leadId })
     }
 
