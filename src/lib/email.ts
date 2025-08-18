@@ -8,7 +8,7 @@ interface EmailOptions {
 }
 
 // Create transporter (configure with your email service)
-const transporter = nodemailer.createTransporter({
+const transporter = nodemailer.createTransport({
   // For development, use a service like Ethereal Email or configure with your SMTP
   host: process.env.SMTP_HOST || 'smtp.ethereal.email',
   port: parseInt(process.env.SMTP_PORT || '587'),
