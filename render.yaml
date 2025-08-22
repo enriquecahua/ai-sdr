@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: ai-sdr
+    env: node
+    region: oregon  # Choose your preferred region
+    buildCommand: npm install && npx prisma generate && npx prisma migrate deploy && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXTAUTH_SECRET
+        generateValue: true
+      - key: NEXTAUTH_URL
+        sync: false  # You'll set this in the dashboard after deployment
+    plan: free  # or 'starter' for production

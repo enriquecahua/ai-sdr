@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "render-build": "prisma generate && prisma migrate deploy && next build",
     "start:azure": "prisma migrate deploy && next start",
     "lint": "next lint",
     "db:migrate": "prisma migrate dev",
